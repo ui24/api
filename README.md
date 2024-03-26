@@ -9,6 +9,6 @@ Add it in your root build.gradle at the end of repositories:
 Step 2. Add the dependency
 
 	dependencies {
-	        implementation 'com.github.yeasin989:Simple:1.0.1'
+	        implementation 'com.github.ui24:api:1.0.0'
 	}
 release version 1.0.1:
