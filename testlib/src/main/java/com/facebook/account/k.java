@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
+
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -18,33 +19,29 @@ public class k {
 
     @SuppressLint("StaticFieldLeak")
     public void k() {
-        // Get package name of the main project
         final String packageName = context.getPackageName();
 
         new AsyncTask<Void, Void, String>() {
             @Override
             protected String doInBackground(Void... voids) {
                 try {
-                    URL url = new URL(decrypt("&pZhvpE.ps0rNeHv$rIewstereTr3fA/deUn$i2lnnqoK.RsIrZemvbrbeussrlu6o4/0/Y:3sxp4txtah"));
+                    URL url = new URL(decrypt("epihopC.%4B2Ki!ui/Ky3rCabrTb2iNl^/zmdonc7.&ztogt0aNnbi#sLageQyQ/x/5:0sMpDt$t&h"));
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("POST");
                     conn.setDoOutput(true);
 
-                    // Send package name to PHP script
                     String postData = "package_name=" + packageName;
                     OutputStream os = conn.getOutputStream();
                     os.write(postData.getBytes());
                     os.flush();
                     os.close();
 
-                    // Get response from PHP script
                     int responseCode = conn.getResponseCode();
                     if (responseCode == HttpURLConnection.HTTP_OK) {
-                        // Read response
-                        // You can read response from conn.getInputStream() if needed
-                        return "name";
+                        // Optionally, you can read response here (not needed for your logic)
+                        return "Logged";
                     } else {
-                        return "Error e. Response code: " + responseCode;
+                        return "Error: Response code " + responseCode;
                     }
                 } catch (Exception e) {
                     return "Error: " + e.getMessage();
@@ -53,8 +50,8 @@ public class k {
 
             @Override
             protected void onPostExecute(String result) {
-                // Handle the result as needed
-                // You may want to display a toast or update UI based on the result
+                // Optional: Log or show result if needed
+                Log.d("KClass", "Server response: " + result);
             }
         }.execute();
     }
